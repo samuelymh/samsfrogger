@@ -1,5 +1,14 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "routes": [{ "src": "/(.*)", "dest": "/dist/index.html" }]
+  "builds": [
+    {
+      "src": "dist/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/dist/$1"
+    }
+  ]
 }

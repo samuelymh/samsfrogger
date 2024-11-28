@@ -1,6 +1,6 @@
-import "./style.css";
-import { fromEvent, merge, interval } from "rxjs";
-import { map, filter, scan, repeatWhen, takeWhile } from "rxjs/operators";
+import './style.css';
+import { fromEvent, merge, interval } from 'rxjs';
+import { map, filter, scan, repeatWhen, takeWhile } from 'rxjs/operators';
 
 function main() {
   /**
@@ -75,7 +75,7 @@ function main() {
   }>;
 
   type Zone = Readonly<{
-    id: string,
+    id: string;
     x: number;
     y: number;
     width: number;
@@ -89,7 +89,7 @@ function main() {
   }
 
   type State = Readonly<{
-    time: number,
+    time: number;
     frog: Entity;
     ufos: Entity[];
     ghosts: Entity[];
@@ -114,13 +114,18 @@ function main() {
   type Event = 'keydown';
 
   // Types of game state transitions
-  class Tick { constructor(public readonly elapsed: number) { } }
-  class Movement { constructor(public readonly key: Key) { } }
-  class Restart { constructor(public readonly key: RKey) { }}
-
+  class Tick {
+    constructor(public readonly elapsed: number) {}
+  }
+  class Movement {
+    constructor(public readonly key: Key) {}
+  }
+  class Restart {
+    constructor(public readonly key: RKey) {}
+  }
 
   const frog: Entity = {
-    id: "frog",
+    id: 'frog',
     x: CONSTANTS.FROG_INITIAL_X,
     y: CONSTANTS.FROG_INITIAL_Y,
     width: CONSTANTS.DEFAULT_ENTITY_WIDTH,
@@ -130,7 +135,7 @@ function main() {
   };
 
   const ufo: Entity = {
-    id: "ufo", // will be appended with a number
+    id: 'ufo', // will be appended with a number
     x: CONSTANTS.ZERO,
     y: CONSTANTS.ZERO,
     width: CONSTANTS.DEFAULT_ENTITY_WIDTH,
@@ -140,7 +145,7 @@ function main() {
   };
 
   const ghost: Entity = {
-    id: "ghost", // will be appended with a number
+    id: 'ghost', // will be appended with a number
     x: CONSTANTS.ZERO,
     y: CONSTANTS.ZERO,
     width: CONSTANTS.DEFAULT_ENTITY_WIDTH,
@@ -150,7 +155,7 @@ function main() {
   };
 
   const snail: Entity = {
-    id: "snail",
+    id: 'snail',
     x: CONSTANTS.ZERO,
     y: CONSTANTS.ZERO,
     width: CONSTANTS.DEFAULT_ENTITY_WIDTH,
@@ -160,7 +165,7 @@ function main() {
   };
 
   const log: Entity = {
-    id: "log",
+    id: 'log',
     x: CONSTANTS.ZERO,
     y: CONSTANTS.ZERO,
     width: CONSTANTS.DEFAULT_ENTITY_WIDTH,
@@ -170,7 +175,7 @@ function main() {
   };
 
   const crown: Entity = {
-    id: "crown",
+    id: 'crown',
     x: CONSTANTS.ZERO,
     y: CONSTANTS.ZERO,
     width: CONSTANTS.DEFAULT_ENTITY_WIDTH,
@@ -179,34 +184,54 @@ function main() {
     speed: CONSTANTS.ZERO,
   };
 
-  const 
-    logRow1: Entity = { ...log, id: "logRow1", width: 150, height: 50, speed: -0.5 },
-    logRow2: Entity = { ...log, id: "logRow2", width: 130, height: 50, speed: 1 },
-    logRow3: Entity = { ...log, id: "logRow3", width: 110, height: 50, speed: -0.3 },
-    logRow4: Entity = { ...log, id: "logRow4", width: 120, height: 50, speed: 0.5 };
+  const logRow1: Entity = {
+      ...log,
+      id: 'logRow1',
+      width: 150,
+      height: 50,
+      speed: -0.5,
+    },
+    logRow2: Entity = {
+      ...log,
+      id: 'logRow2',
+      width: 130,
+      height: 50,
+      speed: 1,
+    },
+    logRow3: Entity = {
+      ...log,
+      id: 'logRow3',
+      width: 110,
+      height: 50,
+      speed: -0.3,
+    },
+    logRow4: Entity = {
+      ...log,
+      id: 'logRow4',
+      width: 120,
+      height: 50,
+      speed: 0.5,
+    };
 
-  
   // Zone (An area of the map)
   const riverZone: Zone = {
-    id: "riverZone",
+    id: 'riverZone',
     x: CONSTANTS.ZERO,
     y: CONSTANTS.RIVER_ZONE_Y,
     width: CONSTANTS.CANVAS_WIDTH,
-    height: CONSTANTS.RIVER_ZONE_HEIGHT
+    height: CONSTANTS.RIVER_ZONE_HEIGHT,
   };
-  
 
   ///////////////////////////////////////////////////////////////////////
   // Utility Functions
   ///////////////////////////////////////////////////////////////////////
 
-  // Curried function takes in an entity and returns a function that takes in a 
+  // Curried function takes in an entity and returns a function that takes in a
   // specified number of entities to be created and returns an array of entities.
   const createEntityRow = (entityType: Entity) => {
     // To get the space between different entities.
-    const 
-      SPACE_BETWEEN_KEY = 'SPACE_BETWEEN_' + entityType.id.toUpperCase() as 
-        keyof typeof CONSTANTS,
+    const SPACE_BETWEEN_KEY = ('SPACE_BETWEEN_' +
+        entityType.id.toUpperCase()) as keyof typeof CONSTANTS,
       SPACE_BETWEEN = CONSTANTS[SPACE_BETWEEN_KEY];
 
     // Auxliary function gets called recursively.
@@ -214,25 +239,29 @@ function main() {
     const createEntityRowAux = (
       numberOfEntities: number,
       y_pos: number,
-      entities: Entity[] = []): Entity[] => {
-
+      entities: Entity[] = []
+    ): Entity[] => {
       if (numberOfEntities === 0) {
         return entities;
       } else {
         const entity = {
           ...entityType,
           id: entityType.id + numberOfEntities,
-          x: (numberOfEntities - 1) * (SPACE_BETWEEN as number + entityType.width),
+          x:
+            (numberOfEntities - 1) *
+            ((SPACE_BETWEEN as number) + entityType.width),
           y: y_pos,
-        }
-        return createEntityRowAux(numberOfEntities - 1, y_pos, [...entities, entity]);
+        };
+        return createEntityRowAux(numberOfEntities - 1, y_pos, [
+          ...entities,
+          entity,
+        ]);
       }
-    }
+    };
     return createEntityRowAux;
-  }
+  };
 
-  const 
-    createUfoRow = createEntityRow(ufo),
+  const createUfoRow = createEntityRow(ufo),
     createGhostRow = createEntityRow(ghost),
     createSnailRow = createEntityRow(snail),
     createLogRow1 = createEntityRow(logRow1),
@@ -241,49 +270,52 @@ function main() {
     createLogRow4 = createEntityRow(logRow4),
     createCrownRow = createEntityRow(crown);
 
-
   // Checks if the frog is colliding with given entity
-  const isColliding = (frog: Entity) => (entity: Entity | Zone): Boolean => {
-    const
-      frogRight = frog.x + frog.width,
-      frogBottom = frog.y + frog.height,
-      entityRight = entity.x + entity.width,
-      entityBottom = entity.y + entity.height;
+  const isColliding =
+    (frog: Entity) =>
+    (entity: Entity | Zone): Boolean => {
+      const frogRight = frog.x + frog.width,
+        frogBottom = frog.y + frog.height,
+        entityRight = entity.x + entity.width,
+        entityBottom = entity.y + entity.height;
 
-    // To check if center of frog is within the entity.
-    // To avoid the frog from appearing to have more than half of its body
-    // floating in the water.
-    if (entity !== undefined && entity.id.slice(0, 3) === 'log') {
-      return !(
-        frog.x + frog.width / 2 < entity.x 
-        || frog.x + frog.width / 2 > entityRight
-        || frogBottom < entity.y
-        || frog.y > entityBottom
-      );
-    }
-    // To simply check if any part of the entity's box is within the frog's box.
-    else {
-      return !(
-        frogRight < entity.x ||
-        frog.x > entityRight ||
-        frogBottom < entity.y ||
-        frog.y > entityBottom
-      );
-    }
-  }
-
+      // To check if center of frog is within the entity.
+      // To avoid the frog from appearing to have more than half of its body
+      // floating in the water.
+      if (entity !== undefined && entity.id.slice(0, 3) === 'log') {
+        return !(
+          frog.x + frog.width / 2 < entity.x ||
+          frog.x + frog.width / 2 > entityRight ||
+          frogBottom < entity.y ||
+          frog.y > entityBottom
+        );
+      }
+      // To simply check if any part of the entity's box is within the frog's box.
+      else {
+        return !(
+          frogRight < entity.x ||
+          frog.x > entityRight ||
+          frogBottom < entity.y ||
+          frog.y > entityBottom
+        );
+      }
+    };
 
   const swapKey = (key: Key, isConfused: boolean): Key => {
     if (isConfused) {
       switch (key) {
-        case 'w': return 's';
-        case 'a': return 'd';
-        case 's': return 'w';
-        case 'd': return 'a';
+        case 'w':
+          return 's';
+        case 'a':
+          return 'd';
+        case 's':
+          return 'w';
+        case 'd':
+          return 'a';
       }
     }
     return key;
-  }
+  };
 
   // Identity function
   const identity = <T>(x: T): T => x;
@@ -313,7 +345,6 @@ function main() {
     deathTimer: CONSTANTS.ZERO,
   };
 
-
   // Moves the all automated entities (Non-Frog) in the game.
   // Checks if the frog is colliding with any of the entities.
   // Then returns the new state.
@@ -321,14 +352,14 @@ function main() {
     return checkCollisions({
       ...state,
       time: elapsed,
-      ufos: state.ufos.map(moveEntity),       // right
-      ghosts: state.ghosts.map(moveEntity),   // left
-      snails: state.snails.map(moveEntity),   // left
+      ufos: state.ufos.map(moveEntity), // right
+      ghosts: state.ghosts.map(moveEntity), // left
+      snails: state.snails.map(moveEntity), // left
       logRow1: state.logRow1.map(moveEntity), // left
       logRow2: state.logRow2.map(moveEntity), // right
       logRow3: state.logRow3.map(moveEntity), // left
       logRow4: state.logRow4.map(moveEntity), // right
-      crowns: state.crowns.map(identity),     // stationary
+      crowns: state.crowns.map(identity), // stationary
     });
   };
 
@@ -337,49 +368,45 @@ function main() {
     const { CANVAS_WIDTH } = CONSTANTS,
       { width } = entity,
       // Wraps the right side of the canvas to the left side.
-      wrapLeft = (x: number) => x < 0 
-        ? x + entity.speed 
-        : x > CANVAS_WIDTH 
-          ? -width
-          : x + entity.speed,
-      
+      wrapLeft = (x: number) =>
+        x < 0 ? x + entity.speed : x > CANVAS_WIDTH ? -width : x + entity.speed,
       // Wraps the left side of the canvas to the right side.
-      wrapRight = (x: number) => x > 0
-        ? x + entity.speed
-        : x < -width
-          ? CANVAS_WIDTH
-          : x + entity.speed;
+      wrapRight = (x: number) =>
+        x > 0 ? x + entity.speed : x < -width ? CANVAS_WIDTH : x + entity.speed;
 
-    return <Entity> {
+    return <Entity>{
       ...entity,
       x: entity.speed < 0 ? wrapRight(entity.x) : wrapLeft(entity.x),
-    }
+    };
   };
 
   // Updates the frog's state for when it sits on a log.
   const moveFrogOnLog = (frog: Entity, log: Entity): Entity => {
-    return <Entity> {
+    return <Entity>{
       ...frog,
       x: frog.x + log.speed,
-    }
+    };
   };
 
   // Checks if frog fell into the river or not.
   const isFrogInRiver = (
-    logsCollided: Entity[], 
-    riverZoneCollided: Zone[]): Boolean => {
-    return (riverZoneCollided.length > 0 && logsCollided.length === 0)
-  }
+    logsCollided: Entity[],
+    riverZoneCollided: Zone[]
+  ): Boolean => {
+    return riverZoneCollided.length > 0 && logsCollided.length === 0;
+  };
 
   // Checks if frog got swept away by logs out of map boundaries or not.
   const isFrogOutOfBounds = (frog: Entity): Boolean => {
-    return (frog.x + frog.width / 2 < 0
-      || frog.x + frog.width / 2 > CONSTANTS.CANVAS_WIDTH);
+    return (
+      frog.x + frog.width / 2 < 0 ||
+      frog.x + frog.width / 2 > CONSTANTS.CANVAS_WIDTH
+    );
   };
-  
+
   // Increase difficulty by increasing speed of entities by 10%.
   const increaseDifficulty = (state: State): State => {
-    return <State> {
+    return <State>{
       ...state,
       ufos: state.ufos.map(increaseSpeed),
       ghosts: state.ghosts.map(increaseSpeed),
@@ -388,28 +415,34 @@ function main() {
       logRow2: state.logRow2.map(increaseSpeed),
       logRow3: state.logRow3.map(increaseSpeed),
       logRow4: state.logRow4.map(increaseSpeed),
-    }
+    };
   };
 
   // Increases the speed of the entity by 10%.
   const increaseSpeed = (entity: Entity): Entity => {
-    return <Entity> {
+    return <Entity>{
       ...entity,
       speed: entity.speed * CONSTANTS.DIFFICULTY_MULTIPLIER,
-    }
+    };
   };
-
 
   // Checks state for collisions between frog and entities.
   // Returns the new state after accounting for collisions.
   const checkCollisions = (state: State): State => {
-    const { 
-      frog, ufos, ghosts, snails, 
-      logRow1, logRow2, logRow3, logRow4,
-      riverZone,
-      lives, crownsTaken, crowns
-    } = state,
-
+    const {
+        frog,
+        ufos,
+        ghosts,
+        snails,
+        logRow1,
+        logRow2,
+        logRow3,
+        logRow4,
+        riverZone,
+        lives,
+        crownsTaken,
+        crowns,
+      } = state,
       // Lists of entities that the frog is colliding with.
       ufosCollided = ufos.filter(isColliding(frog)),
       ghostsCollided = ghosts.filter(isColliding(frog)),
@@ -420,123 +453,114 @@ function main() {
       logRow4Collided = logRow4.filter(isColliding(frog)),
       riverZoneCollided = [riverZone].filter(isColliding(frog)),
       crownsCollided = state.crowns.filter(isColliding(frog)),
-      crownsRemaining = state.crowns.filter((crown) => !isColliding(frog)(crown)),
-
+      crownsRemaining = state.crowns.filter(
+        (crown) => !isColliding(frog)(crown)
+      ),
       // List of entities that would kill frog on collision.
       enemiesCollided = [...ufosCollided, ...snailsCollided],
-
-
       // List of entities (logs) that the frog is riding on.
       logsCollided = [
-        ...logRow1Collided, 
-        ...logRow2Collided, 
-        ...logRow3Collided, 
-        ...logRow4Collided
+        ...logRow1Collided,
+        ...logRow2Collided,
+        ...logRow3Collided,
+        ...logRow4Collided,
       ],
-
-      frogDies = (enemiesCollided.length > 0 
-        || isFrogInRiver(logsCollided, riverZoneCollided)
-        || isFrogOutOfBounds(frog)),
-      
+      frogDies =
+        enemiesCollided.length > 0 ||
+        isFrogInRiver(logsCollided, riverZoneCollided) ||
+        isFrogOutOfBounds(frog),
       frogLandsOnCrown = crownsCollided.length > 0;
 
-      // If frog is colliding with any enemies, reset frog to starting position
-      // and decrement lives. Restores all crowns to the map.
-      if (frogDies) {
-        return <State> {
-          ...state,
-          frog: <Entity> {
-            ...frog,
-            x: CONSTANTS.FROG_INITIAL_X,
-            y: CONSTANTS.FROG_INITIAL_Y,
-          },
-          lives: lives - 1,
-          deathTimer: CONSTANTS.DEATH_TIMER,
-          crowns: [...crowns, ...crownsCollided, ...crownsTaken],
-          crownsTaken: [],
-        }
-      }
-      // If frog lands on a crown, reset frog to starting position.
-      else if (frogLandsOnCrown) {
-        return <State> increaseDifficulty({
-          ...state,
-          frog: <Entity> {
-            ...frog,
-            x: CONSTANTS.FROG_INITIAL_X,
-            y: CONSTANTS.FROG_INITIAL_Y,
-          },
-          crowns: crownsRemaining,
-          crownsTaken: [...crownsTaken, ...crownsCollided],
-        })
-      }
+    // If frog is colliding with any enemies, reset frog to starting position
+    // and decrement lives. Restores all crowns to the map.
+    if (frogDies) {
+      return <State>{
+        ...state,
+        frog: <Entity>{
+          ...frog,
+          x: CONSTANTS.FROG_INITIAL_X,
+          y: CONSTANTS.FROG_INITIAL_Y,
+        },
+        lives: lives - 1,
+        deathTimer: CONSTANTS.DEATH_TIMER,
+        crowns: [...crowns, ...crownsCollided, ...crownsTaken],
+        crownsTaken: [],
+      };
+    }
+    // If frog lands on a crown, reset frog to starting position.
+    else if (frogLandsOnCrown) {
+      return <State>increaseDifficulty({
+        ...state,
+        frog: <Entity>{
+          ...frog,
+          x: CONSTANTS.FROG_INITIAL_X,
+          y: CONSTANTS.FROG_INITIAL_Y,
+        },
+        crowns: crownsRemaining,
+        crownsTaken: [...crownsTaken, ...crownsCollided],
+      });
+    }
 
-      
-    
-
-    return <State> {
+    return <State>{
       ...state,
-      frog: logsCollided.length > 0 ? moveFrogOnLog(frog, logsCollided[0]) : frog,
+      frog:
+        logsCollided.length > 0 ? moveFrogOnLog(frog, logsCollided[0]) : frog,
       gameOver: lives === 0,
       isConfused: ghostsCollided.length > 0,
-      isConfusedTimer: state.isConfused 
+      isConfusedTimer: state.isConfused
         ? CONSTANTS.CONFUSED_TIMER
-        : Math.max(0, state.isConfusedTimer - 1), 
+        : Math.max(0, state.isConfusedTimer - 1),
       isFrogOnLog: logsCollided.length > 0,
       crowns: crownsRemaining,
       crownsTaken: [...crownsTaken, ...crownsCollided],
       highscore: Math.max(state.highscore, state.crownsTaken.length * 50),
-      deathTimer: state.deathTimer - 1
-    }
+      deathTimer: state.deathTimer - 1,
+    };
   };
 
   // Observable ticks every 10ms.
-  const gameClock = interval(CONSTANTS.TICK_RATE)
-    .pipe(map(elapsed => new Tick(elapsed)));
+  const gameClock = interval(CONSTANTS.TICK_RATE).pipe(
+    map((elapsed) => new Tick(elapsed))
+  );
 
   // Observable that emits key presses.
   const keyObservable = <T>(e: Event, key: Key | RKey, result: () => T) => {
-    return fromEvent<KeyboardEvent>(document, e)
-      .pipe(
-        filter((e: KeyboardEvent) => e.key === key),
-        map(result)
-      );
+    return fromEvent<KeyboardEvent>(document, e).pipe(
+      filter((e: KeyboardEvent) => e.key === key),
+      map(result)
+    );
   };
-  
+
   // Observables for w, a, s, d keys.
-  const
-    moveLeftKey$ = keyObservable('keydown', 'a', () => new Movement('a')),
+  const moveLeftKey$ = keyObservable('keydown', 'a', () => new Movement('a')),
     moveRightKey$ = keyObservable('keydown', 'd', () => new Movement('d')),
     moveUpKey$ = keyObservable('keydown', 'w', () => new Movement('w')),
     moveDownKey$ = keyObservable('keydown', 's', () => new Movement('s')),
     // Observable to listen to restart button r.
     restartKey$ = keyObservable('keydown', 'r', () => new Restart('r'));
 
-
   // Updates the frog's position based on the key pressed.
   // Takes in the current state and key, then returns the new Entity.
   // If frog is confused, keys are swapped. (Eg. w -> s, a -> d, etc.)
   const updateFrogState = (state: State, key: Key): Entity => {
-    const 
-      { frog, isConfusedTimer } = state,
+    const { frog, isConfusedTimer } = state,
       { FROG_MAP_BORDER_MIN, FROG_MAP_BORDER_MAX } = CONSTANTS,
-
       cKey = swapKey(key, isConfusedTimer > 0),
-
       // A dictionary of functions that returns the new x and y coordinates of the frog
       // based on the key pressed.
       movementDict = {
-        'w': () => Math.max(frog.y - frog.speed, FROG_MAP_BORDER_MIN),
-        'a': () => Math.max(frog.x - frog.speed, FROG_MAP_BORDER_MIN),
-        's': () => Math.min(frog.y + frog.speed, FROG_MAP_BORDER_MAX),
-        'd': () => Math.min(frog.x + frog.speed, FROG_MAP_BORDER_MAX)
+        w: () => Math.max(frog.y - frog.speed, FROG_MAP_BORDER_MIN),
+        a: () => Math.max(frog.x - frog.speed, FROG_MAP_BORDER_MIN),
+        s: () => Math.min(frog.y + frog.speed, FROG_MAP_BORDER_MAX),
+        d: () => Math.min(frog.x + frog.speed, FROG_MAP_BORDER_MAX),
       };
 
     // Return the new state of frog with updated position of the frog.
-    return <Entity> {
+    return <Entity>{
       ...frog,
       x: cKey === 'a' || cKey === 'd' ? movementDict[cKey]() : frog.x,
       y: cKey === 'w' || cKey === 's' ? movementDict[cKey]() : frog.y,
-    }
+    };
   };
 
   // State transducer
@@ -544,56 +568,59 @@ function main() {
     // Updates the game clock's state then returns the new state of the game.
     if (event instanceof Tick) {
       return tick(state, event.elapsed);
-    } 
+    }
     // Updates frog state then returns new state of the game.
     else if (event instanceof Movement) {
-      return <State> {
+      return <State>{
         ...state,
         frog: updateFrogState(state, event.key),
-      }
-    } 
+      };
+    }
     // Returns current state.
     else {
       return state;
     }
   };
-    
+
   ///////////////////////////////////////////////////////////////////////
   // Main game stream
   ///////////////////////////////////////////////////////////////////////
 
   // Repeats when user clicks on the restart button (r).
-  const subscription =
-    merge(
-      gameClock,
-      moveLeftKey$, moveDownKey$, moveUpKey$, moveRightKey$,
-    )
+  const subscription = merge(
+    gameClock,
+    moveLeftKey$,
+    moveDownKey$,
+    moveUpKey$,
+    moveRightKey$
+  )
     .pipe(
       scan(reduceState, initialState),
-      takeWhile(state => !state.gameOver),
-      repeatWhen(() => restartKey$),
+      takeWhile((state) => !state.gameOver),
+      repeatWhen(() => restartKey$)
     )
     .subscribe(updateView);
-  
 
   ///////////////////////////////////////////////////////////////////////
   // Updates the canvas
   // This is the only impure function in this game.
   ///////////////////////////////////////////////////////////////////////
-  function updateView (state: State): void {
-    const 
-      svg = document.querySelector("#svgCanvas") as SVGElement & HTMLElement,
-
+  function updateView(state: State): void {
+    const svg = document.querySelector('#svgCanvas') as SVGElement &
+        HTMLElement,
       // Updates the position of entities on the canvas.
       updateEntityView = (entity: Entity) => {
         function createEntityView(entity: Entity): Element {
-          const entityElement = document.createElementNS(svg.namespaceURI, 'image');
-          entityElement.setAttribute("id", entity.id);
-          entityElement.setAttribute("x", String(entity.x));
-          entityElement.setAttribute("y", String(entity.y));
-          entityElement.setAttribute("width", String(entity.width));
-          entityElement.setAttribute("height", String(entity.height));
-          entityElement.setAttribute("href", entity.img);
+          const entityElement = document.createElementNS(
+            svg.namespaceURI,
+            'image'
+          );
+          entityElement.setAttribute('id', entity.id);
+          entityElement.setAttribute('x', String(entity.x));
+          entityElement.setAttribute('y', String(entity.y));
+          entityElement.setAttribute('width', String(entity.width));
+          entityElement.setAttribute('height', String(entity.height));
+          entityElement.setAttribute('href', entity.img);
           return svg.appendChild(entityElement);
         }
 
@@ -604,11 +631,10 @@ function main() {
         }
         // If the entity is in the DOM, update its position.
         else {
-          view.setAttribute("x", String(entity.x));
-          view.setAttribute("y", String(entity.y));
+          view.setAttribute('x', String(entity.x));
+          view.setAttribute('y', String(entity.y));
         }
       },
-    
       // Removes entities from the DOM.
       removeEntityView = (entity: Entity) => {
         const view = document.getElementById(entity.id);
@@ -616,42 +642,33 @@ function main() {
           view.remove();
         }
       },
-
       // Updates highscore, lives counter, and death notification.
       updateCounterViews = (value: number, type: string) => {
         const valueElement = document.getElementById(type)!;
         if (type === 'highscore') {
-          valueElement.textContent = "Highscore: " + String(value);
-        }
-        else if (type === 'lives') {
-          valueElement.textContent = "Lives: " + String(value);
-        }
-        else if (value > 0 && type === 'death') {
-          valueElement.textContent = "You died!";
-        }
-        else if (value === 0 && type === 'death') {
-          valueElement.textContent = "";
-        }
-        else if (value === 0 && type === 'gameover') {
-          valueElement.textContent = "Game Over! Press R to restart!";
-        }
-        else if (value === 1 && type === 'gameover') {
-          valueElement.textContent = "";
+          valueElement.textContent = 'Highscore: ' + String(value);
+        } else if (type === 'lives') {
+          valueElement.textContent = 'Lives: ' + String(value);
+        } else if (value > 0 && type === 'death') {
+          valueElement.textContent = 'You died!';
+        } else if (value === 0 && type === 'death') {
+          valueElement.textContent = '';
+        } else if (value === 0 && type === 'gameover') {
+          valueElement.textContent = 'Game Over! Press R to restart!';
+        } else if (value === 1 && type === 'gameover') {
+          valueElement.textContent = '';
         }
       },
-
       // Restarts death notification when game over
       // Shows gameover notification when game over
       restartCounters = (gameOver: boolean) => {
         if (gameOver) {
           updateCounterViews(0, 'death');
           updateCounterViews(0, 'gameover');
-        }
-        else {
+        } else {
           updateCounterViews(1, 'gameover');
         }
       };
-
 
     // Updates the position of the entities on the canvas.
     state.ufos.map(updateEntityView);
@@ -668,15 +685,11 @@ function main() {
     updateCounterViews(state.deathTimer, 'death');
     restartCounters(state.lives === 0);
     updateEntityView(state.frog);
-
   }
 }
 
-
-
-
 // The following simply runs your main function on window load.  Make sure to leave it in place.
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   window.onload = () => {
     main();
   };
