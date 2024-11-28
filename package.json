@@ -4,7 +4,7 @@
   "description": "",
   "main": "./src/main.ts",
   "scripts": {
-    "build": "webpack --watch",
+    "build": "webpack",
     "dev": "webpack serve"
   },
   "keywords": [],
