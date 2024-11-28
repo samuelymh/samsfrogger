@@ -4,8 +4,8 @@
   "description": "",
   "main": "./src/main.ts",
   "scripts": {
-    "build": "npm run build",
-    "dev": "npm run dev"
+    "build": "webpack --watch",
+    "dev": "webpack serve"
   },
   "keywords": [],
   "author": "",
