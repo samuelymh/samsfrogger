@@ -1,21 +1,21 @@
-import { join, resolve } from "path";
-import HtmlWebpackPlugin from "html-webpack-plugin";
+import { join, resolve } from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-import { Configuration as WebpackConfiguration } from "webpack";
-import { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
+import { Configuration as WebpackConfiguration } from 'webpack';
+import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 
 interface Configuration extends WebpackConfiguration {
   devServer?: WebpackDevServerConfiguration;
 }
 
 const config: Configuration = {
-  mode: "development",
+  mode: 'development',
   entry: {
-    main: "./src/main.ts",
+    main: './src/main.ts',
   },
-  devtool: "inline-source-map",
+  devtool: 'inline-source-map',
   devServer: {
-    static: join(__dirname, "build"),
+    static: join(__dirname, 'build'),
     client: {
       overlay: true,
     },
@@ -34,25 +34,25 @@ const config: Configuration = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        use: 'ts-loader',
         exclude: /node_modules/,
       },
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js"],
+    extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: "[name].js",
-    path: resolve(__dirname, "dist"),
+    filename: '[name].js',
+    path: resolve(__dirname, 'dist'),
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/index.html",
+      template: './src/index.html',
     }),
   ],
 };
